@@ -1,19 +1,27 @@
 #!/bin/sh
 #
-# /etc/default/duplicacy
+# /etc/default/duplicacy-wrapper
 
 SNAPSHOT_ID=host-volume		# snapshot-id to back up, in .duplicacy/preferences
-REPO_ROOT=/volume1		# duplicacy root dir, contains .duplicacy
-LOGDIR=/volume2/duplicacy/logs	# base path for logging
+REPO_ROOT=/			# duplicacy root dir, contains .duplicacy
+LOGDIR=/var/log/duplicacy	# base path for logging
 CMD=/usr/local/bin/duplicacy	# path to duplicacy binary
-OFFSITE_STORAGE=b2  		# storage name in .duplicacy/preferences
-OFFSITE_UPLOAD_THREADS=10	# ~1MB/s per thread
+OFFSITE_STORAGE=""  		# storage name in .duplicacy/preferences
+OFFSITE_UPLOAD_THREADS=10	# ~1-2MB/s per thread
 PRUNE_HOUR=0			# hour of the day to prune, assuming script
-				# runs once per day
+				# runs once per hour and we only prune once/day
 PRUNE_DRY_RUN="-d"		# set to "" to actually prune
+
+# duplicacy help prune | grep keep
+# -keep <n:m> [+]   keep 1 snapshot every n days for snapshots older than m days
+
+# example by gchen
 PRUNE_POLICY="-keep 1:3 \
 	      -keep 7:30 \
 	      -keep 30:180 \
 	      -keep 0:360"
 
-
+# similar to TimeMachine (I think)
+#PRUNE_POLICY="-keep 1:2 \
+#	      -keep 1:30 \
+#	      -keep 7:360"
