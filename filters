@@ -1,0 +1,41 @@
+# filter reference
+# https://github.com/gilbertchen/duplicacy/blob/master/GUIDE.md#includeexclude-patterns
+
+### Home directories #############
+#
++home/
+# exclude caches & trashes
+-home/*/.cache/
+-home/*/.thumbnails/
+-home/*/.local/share/Trash/
+-home/*/.mozilla/firefox/*/Cache/
+
+# exclude Downloads
+-home/*/Downloads/
+
+# exclude config dirs that are really state
+-home/*/.pulse/
+-home/*/.local/share/gvfs-metadata/
+-home/*/.local/share/zeitgeist/
+
+# exclude Google Chrome profiles, already sync'd
+-home/*/.config/google-chrome*/
+
+# include everything else in /home
++home/*
+##################################
+
+### local config
++etc/
++etc/*
++root/
++root/*
+##################################
+
+
+### exclude everything else ######
+-*
+-*/
+##################################
+
+
