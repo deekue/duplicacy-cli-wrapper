@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# backup system package config not in /etc
+
+BACKUP_DIR=/root/package.config.backup
+[ -d "$BACKUP_DIR" ] || mkdir -p "$BACKUP_DIR" || exit 1
+
+save_if_changed () {
+  local CMD="$*"
+  local FILE="$(echo $CMD | tr ' ' '.')"
+
+  if [ -r "$BACKUP_DIR/$FILE" ] ; then
+    t=$(mktemp -q) || continue
+    trap "rm -f -- '$t'" EXIT
+    $CMD > "$t"
+    if ! diff -q "$BACKUP_DIR/$FILE" "$t" > /dev/null 2>&1 ; then
+      cp "$t" "$BACKUP_DIR/$FILE"
+    fi 
+    rm -f -- "$t"
+    trap - EXIT
+  else
+    $CMD > "$BACKUP_DIR/$FILE"
+  fi
+}
+
+save_if_changed apt-key exportall
+save_if_changed apt-mark showauto
+save_if_changed apt-mark showmanual
+save_if_changed dpkg --get-selections
