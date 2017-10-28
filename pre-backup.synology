@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# backup Synology config
+
+BACKUP_DIR=/volume1/homes/admin
+BACKUP_FILE=$(hostname).dss
+
+if [ -r "$BACKUP_DIR/$BACKUP_FILE" ] ; then
+  tempdir=$(mktemp -qd) || exit 1
+  trap "rm -rf -- '$tempdir'" EXIT
+  /usr/syno/bin/synoconfbkp export --filepath="$tempdir/$BACKUP_FILE"
+  if ! diff -q "$BACKUP_DIR/$BACKUP_FILE" "$tempdir/$BACKUP_FILE" > /dev/null 2>&1 ; then
+    cp "$tempdir/$BACKUP_FILE" "$BACKUP_DIR/$BACKUP_FILE"
+  fi 
+  rm -rf -- "$tempdir"
+  trap - EXIT
+else
+  /usr/syno/bin/synoconfbkp export --filepath="$BACKUP_DIR/$BACKUP_FILE"
+fi
+
