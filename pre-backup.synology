@@ -10,6 +10,7 @@ if [ -r "$BACKUP_DIR/$BACKUP_FILE" ] ; then
   trap "rm -rf -- '$tempdir'" EXIT
   /usr/syno/bin/synoconfbkp export --filepath="$tempdir/$BACKUP_FILE"
   if ! diff -q "$BACKUP_DIR/$BACKUP_FILE" "$tempdir/$BACKUP_FILE" > /dev/null 2>&1 ; then
+    echo "$tempdir/$BACKUP_FILE is newer, copying to $BACKUP_DIR/$BACKUP_FILE"
     cp "$tempdir/$BACKUP_FILE" "$BACKUP_DIR/$BACKUP_FILE"
   fi 
   rm -rf -- "$tempdir"
