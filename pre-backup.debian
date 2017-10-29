@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# backup system package config not in /etc
+# backup Debian package config not in /etc
 
 BACKUP_DIR=/root/package.config.backup
 [ -d "$BACKUP_DIR" ] || mkdir -p "$BACKUP_DIR" || exit 1
@@ -28,3 +28,7 @@ save_if_changed apt-key exportall
 save_if_changed apt-mark showauto
 save_if_changed apt-mark showmanual
 save_if_changed dpkg --get-selections
+
+# backup Duplicacy configs
+cd "$(dirname -- "$0")/.."
+tar uf $BACKUP_DIR/duplicacy-configs.tar filters known_hosts scripts/

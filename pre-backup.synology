@@ -20,3 +20,6 @@ else
   /usr/syno/bin/synoconfbkp export --filepath="$BACKUP_DIR/$BACKUP_FILE"
 fi
 
+# backup Duplicacy configs
+cd "$(dirname -- "$0")/.."
+tar uf $BACKUP_DIR/duplicacy-configs.tar filters known_hosts scripts/
