@@ -13,7 +13,8 @@ save_if_changed () {
     t=$(mktemp -q) || continue
     trap "rm -f -- '$t'" EXIT
     $CMD > "$t"
-    if ! diff -q "$BACKUP_DIR/$FILE" "$t" > /dev/null 2>&1 ; then
+    diff -q "$BACKUP_DIR/$FILE" "$t" > /dev/null 2>&1
+    if [ "$?" -eq 1 ] ; then
       cp "$t" "$BACKUP_DIR/$FILE"
     fi 
     rm -f -- "$t"
