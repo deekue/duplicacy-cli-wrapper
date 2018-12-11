@@ -2,6 +2,14 @@
 #
 # /etc/default/duplicacy-wrapper
 
+# If you're backing up to an external drive set these
+# MOUNT_POINT is where your external drive should be mounted. The script
+#    assumes the duplicacy sub-dir will be in the root of that dir.
+# DISK_UUID can be found by running 'blkid $DEVICE' where $DEVICE is your
+#    external drive.  eg. 'blkid /dev/sdb1'
+MOUNT_POINT=                    # mount point for external backup drive
+DISK_UUID=                      # disk UUID for external backup drive
+
 SNAPSHOT_ID=$(hostname)-root	# snapshot-id to back up, in .duplicacy/preferences
 REPO_ROOT=/			# duplicacy root dir, contains .duplicacy
 LOGDIR=/var/log/duplicacy	# base path for logging
