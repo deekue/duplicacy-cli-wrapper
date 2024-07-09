@@ -3,10 +3,11 @@
 # backup Synology config
 
 BACKUP_DIR=/volume1/homes/admin
-BACKUP_FILE=$(hostname).dss
+BACKUP_FILE="$(hostname).dss"
 
 if [ -r "$BACKUP_DIR/$BACKUP_FILE" ] ; then
-  tempdir=$(mktemp -qd) || exit 1
+  tempdir="$(mktemp -qd)" || exit 1
+  # shellcheck disable=SC2064 # use current value of $tempdir
   trap "rm -rf -- '$tempdir'" EXIT
   /usr/syno/bin/synoconfbkp export --filepath="$tempdir/$BACKUP_FILE"
   diff -q "$BACKUP_DIR/$BACKUP_FILE" "$tempdir/$BACKUP_FILE" > /dev/null 2>&1
@@ -21,5 +22,5 @@ else
 fi
 
 # backup Duplicacy configs
-cd "$(dirname -- "$0")/.."
-tar uf $BACKUP_DIR/duplicacy-configs.tar filters known_hosts scripts/
+cd "$(dirname -- "$0")/.." || exit 2
+tar uf "$BACKUP_DIR/duplicacy-configs.tar" filters known_hosts scripts/
