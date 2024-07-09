@@ -2,13 +2,15 @@
 # https://github.com/gilbertchen/duplicacy/blob/master/GUIDE.md#includeexclude-patterns
 
 ### Home directories #############
-#
 +home/
+
 # exclude caches & trashes
 -home/*/.cache/
 -home/*/.thumbnails/
 -home/*/.local/share/Trash/
 -home/*/.mozilla/firefox/*/Cache/
+-home/*/.local/share/insync.py/QtWebEngine/Default/GPUCache/
+-home/*/.local/share/Hardcoded Software/dupeGuru/cached_pictures.db
 
 # exclude Downloads
 -home/*/Downloads/
@@ -17,6 +19,14 @@
 -home/*/.pulse/
 -home/*/.local/share/gvfs-metadata/
 -home/*/.local/share/zeitgeist/
+-home/*/.config/Insync/
+-home/*/.gvfs/
+-home/*/.config/chrome-remote-desktop/pulseaudio#*/
+-home/*/.gnupg/S.gpg-agent
+-home/*/.local/share/xorg/Xorg.0.log
+-home/*/.local/share/tracker/data/tracker-store.journal
+-home/*/.local/share/recently-used.xbel
+-home/*/.local/share/gnome-shell/application_state
 
 # exclude Google Chrome profiles, already sync'd
 -home/*/.config/google-chrome*/
@@ -27,8 +37,11 @@
 
 ### local config
 +etc/
+-etc/cups/
 +etc/*
 +root/
+-root/.cache/
+-root/.gnupg/S.gpg-agent
 +root/*
 ##################################
 
@@ -37,5 +50,4 @@
 -*
 -*/
 ##################################
-
 
