@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+#
+
+jobName="$(hostname)_${1:?arg1 is job name}" ; shift
+
+CONFIG=/etc/default/cronitor
+[[ -r "$CONFIG" ]] || exit 1
+# shellcheck source=/etc/default/cronitor
+. "$CONFIG"
+
+function report {
+  local -r jobState="${1:?arg1 is job state}"
+
+  curl -fsSL "https://cronitor.link/p/$API_KEY/${jobName}?state=${jobState}"
+}
+
+report run
+if "$@" ; then
+  report complete
+else
+  report fail
+fi

@@ -1,3 +1,7 @@
+PATH="/usr/local/bin:/usr/bin:/bin"
 # m h  dom mon dow   command
-13 * * * * /usr/local/bin/duplicacy-wrapper.sh
-
+13 * * * * root cronitor duplicacy duplicacy-backup.sh
+# without cronitor
+#13 * * * * root duplicacy-backup.sh
+1  3 * * * root /usr/bin/find /var/log/duplicacy -daystart -type f -ctime +28 -delete > /dev/null
+23 6 1 * * root update-duplicacy.sh

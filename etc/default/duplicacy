@@ -1,34 +1,35 @@
-#!/bin/sh
+#!/bin/bash
 #
-# /etc/default/duplicacy-wrapper
-
-# If you're backing up to an external drive set these
+# shellcheck disable=SC2034  # config not code
+ 
 # MOUNT_POINT is where your external drive should be mounted. The script
-#    assumes the duplicacy sub-dir will be in the root of that dir.
-# DISK_UUID can be found by running 'blkid $DEVICE' where $DEVICE is your
-#    external drive.  eg. 'blkid /dev/sdb1'
-MOUNT_POINT=                    # mount point for external backup drive
-DISK_UUID=                      # disk UUID for external backup drive
+#    assumes the duplicacy sub-dir will be in the root of that device.
+# default: detect first user
+MOUNT_POINT="/media/$(id -un 1000)/backup"
 
-SNAPSHOT_ID=$(hostname)-root	# snapshot-id to back up, in .duplicacy/preferences
-REPO_ROOT=/			# duplicacy root dir, contains .duplicacy
-LOGDIR=/var/log/duplicacy	# base path for logging
-CMD=/usr/local/bin/duplicacy	# path to duplicacy binary
-OFFSITE_STORAGE=offsite 	# storage name in .duplicacy/preferences
-OFFSITE_UPLOAD_THREADS=1 	# ~1-2MB/s per thread
-PRUNE_HOUR=0			# hour of the day to prune, assuming script
-				# runs once per hour and we only prune once/day
-PRUNE_DRY_RUN="-d"		# set to "" to actually prune
+# disk UUID for external backup drive
+# find with: lsblk -no UUID "$(findmnt -no SOURCE "$MOUNT_POINT")
+DISK_UUID=""
 
+SNAPSHOT_ID="$(hostname)-root" # snapshot-id to back up, in .duplicacy/preferences
+REPO_ROOT=/                    # duplicacy root dir, contains .duplicacy
+
+OFFSITE_STORAGE=""          # storage name in .duplicacy/preferences
+OFFSITE_UPLOAD_THREADS=5    # ~1MB/s per thread
+
+PRUNE_HOUR=0                # hour of the day to prune, assuming script runs once per hour
+PRUNE_DRY_RUN=""            # set to "true" for dry-run, empty to prune
+PRUNE_THREADS=5             # number of threads to run for prune
 # duplicacy help prune | grep keep
 # -keep <n:m> [+]   keep 1 snapshot every n days for snapshots older than m days
+PRUNE_POLICY=(-keep 0:360 -keep 30:180 -keep 7:30 -keep 1:3)
 
-# example by gchen
-PRUNE_POLICY="-keep 0:360 \
-	      -keep 30:180 \
-	      -keep 7:30 \
-	      -keep 1:3"
+LOGDIR="/var/log/duplicacy" # base path for logging
+BIN_PATH="/usr/local/bin"   # path to local binaries
+CMD="$BIN_PATH/duplicacy"   # path to duplicacy binary
+REPO="https://api.github.com/repos/gilbertchen/duplicacy/releases/latest"
 
-# similar to TimeMachine (I think)
-#PRUNE_POLICY="-keep 7:30 \
-#	       -keep 1:2"
+DATE="$(date +%Y%m%d)"
+LOG="$LOGDIR/${SNAPSHOT_ID}-${DATE}.log"
+ERROR_LOG="$LOGDIR/${SNAPSHOT_ID}-${DATE}.error.log"
+
