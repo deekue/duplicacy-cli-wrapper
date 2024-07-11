@@ -24,6 +24,7 @@ PRUNE_THREADS=5             # number of threads to run for prune
 # -keep <n:m> [+]   keep 1 snapshot every n days for snapshots older than m days
 PRUNE_POLICY=(-keep 0:360 -keep 30:180 -keep 7:30 -keep 1:3)
 
+LOCKDIR="/var/lock"         # base path for job locking
 LOGDIR="/var/log/duplicacy" # base path for logging
 BIN_PATH="/usr/local/bin"   # path to local binaries
 CMD="$BIN_PATH/duplicacy"   # path to duplicacy binary

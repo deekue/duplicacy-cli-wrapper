@@ -95,6 +95,14 @@ is_ext_drive_mounted () {
   fi
 }
 
+function singleton {
+  local -r jobName="${1:?arg1 is command to run}"
+  (
+    flock -n 9 || exit 9
+    "$@"
+  ) 9> "${LOCKDIR:-/var/lock}/$jobName"
+}
+
 mkdir -p "$LOGDIR"
 
 if [[ -n "$MOUNT_POINT" && -n "$DISK_UUID" ]] ; then
@@ -110,7 +118,8 @@ duplicacy_prune default
 
 ### copy offsite
 if [ -n "$OFFSITE_STORAGE" ] ; then
-  duplicacy_copy_latest "$OFFSITE_STORAGE"
-  duplicacy_prune "$OFFSITE_STORAGE"
+  # only allow one offsite job to run at a time, avoid saturating uplink
+  singleton duplicacy_copy_latest "$OFFSITE_STORAGE"
+  singleton duplicacy_prune "$OFFSITE_STORAGE"
 fi
 

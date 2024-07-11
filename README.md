@@ -18,6 +18,5 @@ simple wrapper for [Duplicacy](https://github.com/gilbertchen/duplicacy) to back
 
 ## TODO
 
-* add locking to prevent multiple jobs running
 * add monthly storage maintenance
 * add timeouts on remote commands
