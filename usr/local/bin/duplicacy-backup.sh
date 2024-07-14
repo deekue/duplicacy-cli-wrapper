@@ -19,11 +19,18 @@ CONFIG=/etc/default/duplicacy
 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
 export DBUS_SESSION_BUS_ADDRESS
 
-# only run prune once per day during $PRUNE_HOUR
-if [[ "$(date +%H)" -eq "$PRUNE_HOUR" ]] ; then
+# only run prune once per week during $PRUNE_HOUR
+if [[ "$(date +%u)" -eq "${PRUNE_DOW:-7}" ]] && [[ "$(date +%H)" -eq "${PRUNE_HOUR:-0}" ]] ; then
 	RUN_PRUNE=true
 else
 	RUN_PRUNE=false
+fi
+
+# run a check once a month during $CHECK_HOUR
+if [[ "$(date +%d)" -eq "${CHECK_DOM:-1}" ]] && [[ "$(date +%H)" -eq "${CHECK_HOUR:-1}" ]] ; then
+  RUN_CHECK=true
+else
+  RUN_CHECK=false
 fi
 
 ERROR () {
@@ -42,8 +49,7 @@ duplicacy_copy_latest () {
 	local STORAGE="$1"
 	[[ -n "$STORAGE" ]] || return
 
-	# hacky BS to get the latest revision
-	LATEST_REVISION=$("$CMD" list -id "$SNAPSHOT_ID" 2>> "$ERROR_LOG" | sed -n -e '$s#^.*revision \([0-9]*\) created at.*$#\1#p')
+  LATEST_REVISION="$(duplicacy_latest_revision)"
 	if [ -n "$LATEST_REVISION" ] ; then
 		"$CMD" -log copy -id "$SNAPSHOT_ID" -r "$LATEST_REVISION" -to "$STORAGE" -threads "$OFFSITE_UPLOAD_THREADS" >> "$LOG" 2>> "$ERROR_LOG"
 	else
@@ -60,6 +66,26 @@ duplicacy_prune () {
 	    -storage "$STORAGE"  \
 	    "${PRUNE_POLICY[@]}" >> "$LOG" 2>> "$ERROR_LOG"
 	fi
+}
+
+duplicacy_latest_revision () {
+	# hacky BS to get the latest revision
+	"$CMD" list -id "$SNAPSHOT_ID" 2>> "$ERROR_LOG" \
+    | sed -n -e '$s#^.*revision \([0-9]*\) created at.*$#\1#p'
+}
+
+duplicacy_check () {
+  local -r STORAGE="${1:?arg1 is storage to check}"
+
+  if [[ "$RUN_CHECK" == "true" ]] ; then
+     "$CMD" -log check -stats \
+       ${CHECK_THREADS:+-threads "$CHECK_THREADS"} \
+       ${RUN_CHUNK_CHECK:+-chunks} \
+       -r "$(duplicacy_latest_revision)" \
+       -storage "$STORAGE" \
+       >> "$LOG" \
+       2>> "$ERROR_LOG"
+  fi
 }
 
 is_ext_drive_mounted () {
@@ -115,11 +141,15 @@ fi
 ### Local backup
 duplicacy_backup default
 duplicacy_prune default
+duplicacy_check default
 
 ### copy offsite
 if [ -n "$OFFSITE_STORAGE" ] ; then
   # only allow one offsite job to run at a time, avoid saturating uplink
   singleton duplicacy_copy_latest "$OFFSITE_STORAGE"
   singleton duplicacy_prune "$OFFSITE_STORAGE"
+  if [[ "${CHECK_OFFSITE:-false}" == "true" ]] ; then
+    singleton duplicacy_check "$OFFSITE_STORAGE"
+  fi
 fi
 
